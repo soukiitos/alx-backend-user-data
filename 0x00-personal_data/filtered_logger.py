@@ -17,6 +17,15 @@ import mysql.connector
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
 
+def filter_datum(
+        fields: List[str], redaction: str, message: str, separator: str
+        ) -> str:
+    """Define filter_datum"""
+    return re.sub(r"(\w+)=([a-zA-Z0-9@\.\-\(\)\ \:\^\<\>\~\$\%\@\?\!\/]*)",
+                  lambda match: match.group(1) + "=" + redaction
+                  if match.group(1) in fields else match.group(0), message)
+
+
 class RedactingFormatter(logging.Formatter):
     """Redacting Formatter class"""
     REDACTION = "***"
@@ -34,15 +43,6 @@ class RedactingFormatter(logging.Formatter):
                 self.fields, self.REDACTION,
                 super(RedactingFormatter, self).format(record), self.SEPARATOR
                 )
-
-
-def filter_datum(
-        fields: List[str], redaction: str, message: str, separator: str
-        ) -> str:
-    """Define filter_datum"""
-    return re.sub(r"(\w+)=([a-zA-Z0-9@\.\-\(\)\ \:\^\<\>\~\$\%\@\?\!\/]*)",
-                  lambda match: match.group(1) + "=" + redaction
-                  if match.group(1) in fields else match.group(0), message)
 
 
 def get_logger() -> logging.Logger:
@@ -77,12 +77,14 @@ def main():
     cursor = db.cursor()
     cursor.execute("SELECT CONCAT(
             'name=', name, ';ssn=', ssn, ';ip=', ip,
-            ';user_agent', user_agent, ';'
+            ';user_agent=', user_agent, ';'
             ) AS message FROM users")
     formatter = RedactingFormatter(fields=PII_FIELDS)
     logger = get_logger()
     for user in cursor:
         logger.log(logging.INFO, user[0])
+    cursor.close()
+    db.close()
 
 
 if __name__ == '__main__':
