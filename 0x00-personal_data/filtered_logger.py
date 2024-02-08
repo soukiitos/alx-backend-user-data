@@ -17,18 +17,8 @@ from typing import List
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
 
-def filter_datum(
-        fields: List[str], redaction: str, message: str, separator: str
-        ) -> str:
-    """Define filter_datum"""
-    return re.sub(r"(\w+)=([a-zA-Z0-9@\.\-\(\)\ \:\^\<\>\~\$\%\@\?\!\/]*)",
-                  lambda match: match.group(1) + "=" + redaction
-                  if match.group(1) in fields else match.group(0), message)
-
-
 class RedactingFormatter(logging.Formatter):
-    """ Redacting Formatter class
-    """
+    """Redacting Formatter class"""
     REDACTION = "***"
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
@@ -44,6 +34,15 @@ class RedactingFormatter(logging.Formatter):
                 self.fields, self.REDACTION,
                 super(RedactingFormatter, self).format(record), self.SEPARATOR
                 )
+
+
+def filter_datum(
+        fields: List[str], redaction: str, message: str, separator: str
+        ) -> str:
+    """Define filter_datum"""
+    return re.sub(r"(\w+)=([a-zA-Z0-9@\.\-\(\)\ \:\^\<\>\~\$\%\@\?\!\/]*)",
+                  lambda match: match.group(1) + "=" + redaction
+                  if match.group(1) in fields else match.group(0), message)
 
 
 def get_logger() -> logging.Logger:
