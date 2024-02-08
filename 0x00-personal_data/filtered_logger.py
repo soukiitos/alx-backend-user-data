@@ -10,7 +10,7 @@ import logging
 import os
 import re
 from typing import List
-import mysql.connector
+from mysql.connector.connection import MySQLConnection
 
 
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
@@ -41,14 +41,12 @@ class RedactingFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """Define format"""
-        record.msg = filter_datum(
+        record_msg = filter_datum(
                 self.fields, self.REDACTION,
-                record.getMessage(), self.SEPARATOR
+                record.msg, self.SEPARATOR
                 )
-        fields = record.msg.split(';')
-        fields = [field.strip() for field in fields]
-        record.msg = '; '.join(fields)
-        return super(RedactingFormatter, self).format(record)
+        record.msg = record_msg
+        return super().format(record)
 
 
 def get_logger() -> logging.Logger:
@@ -62,17 +60,17 @@ def get_logger() -> logging.Logger:
     return lg
 
 
-def get_db() -> mysql.connector.connection.MySQLConnection:
+def get_db() -> MySQLConnection:
     """Define get_db"""
     username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
     password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
     host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
-    ddatabase = os.getenv("PERSONAL_DATA_DB_NAME")
-    db_connect = mysql.connector.connect(
+    db_name = os.getenv("PERSONAL_DATA_DB_NAME")
+    db_connect = MySQLConnection(
             user=username,
             password=password,
             host=host,
-            database=database
+            database=db_name
             )
     return db_connect
 
