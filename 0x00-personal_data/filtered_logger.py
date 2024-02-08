@@ -78,10 +78,10 @@ def main():
     """Define the main"""
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT CONCAT(
+    cursor.execute("""SELECT CONCAT(
             'name=', name, ';ssn=', ssn, ';ip=', ip,
             ';user_agent=', user_agent, ';'
-            ) AS message FROM users")
+            ) AS message FROM users""")
     formatter = RedactingFormatter(fields=PII_FIELDS)
     logger = get_logger()
     for user in cursor:
