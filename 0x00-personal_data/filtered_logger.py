@@ -45,7 +45,9 @@ class RedactingFormatter(logging.Formatter):
                 self.fields, self.REDACTION,
                 record.getMessage(), self.SEPARATOR
                 )
-        record.msg = record.msg.replace(';', '; ')
+        fields = record.msg.split(';')
+        fields = [field.strip() for field in fields]
+        record.msg = '; '.join(fields)
         return super(RedactingFormatter, self).format(record)
 
 
@@ -65,28 +67,27 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
     password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
     host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
-    db_name = os.getenv("PERSONAL_DATA_DB_NAME")
-    cnx = mysql.connector.connect(
+    ddatabase = os.getenv("PERSONAL_DATA_DB_NAME")
+    db_connect = mysql.connector.connect(
             user=username,
             password=password,
             host=host,
-            database=db_name
+            database=database
             )
-    return cnx
+    return db_connect
 
 
 def main():
     """Define the main"""
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("""SELECT CONCAT(
-            'name=', name, ';ssn=', ssn, ';ip=', ip,
-            ';user_agent=', user_agent, ';'
-            ) AS message FROM users""")
+    cursor.execute("""SELECT * FROM users""")
+    field_names = [i[0] for i in cursor.description]
     formatter = RedactingFormatter(fields=PII_FIELDS)
     logger = get_logger()
-    for user in cursor:
-        logger.log(logging.INFO, user[0])
+    for row in cursor:
+        str_row = ''.join(f'{f}={str(r)}; ' for r, f in zip(row, field_names))
+        logger.log(logging.INFO, str_row.strip())
     cursor.close()
     db.close()
 
