@@ -21,9 +21,12 @@ def filter_datum(
         fields: List[str], redaction: str, message: str, separator: str
         ) -> str:
     """Define filter_datum"""
-    return re.sub(r"(\w+)=([a-zA-Z0-9@\.\-\(\)\ \:\^\<\>\~\$\%\@\?\!\/]*)",
-                  lambda match: match.group(1) + "=" + redaction
-                  if match.group(1) in fields else match.group(0), message)
+    for field in fields:
+        message = re.sub(
+                fr"{field}=,*?{separator}",
+                f"{field}={redaction}{separator}", message
+                )
+    return message
 
 
 class RedactingFormatter(logging.Formatter):
@@ -39,10 +42,11 @@ class RedactingFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """Define format"""
-        return filter_datum(
+        record.msg = filter_datum(
                 self.fields, self.REDACTION,
-                super(RedactingFormatter, self).format(record), self.SEPARATOR
+                record.getMessage(), self.SEPARATOR
                 )
+        return super(RedactingFormatter, self).format(record)
 
 
 def get_logger() -> logging.Logger:
