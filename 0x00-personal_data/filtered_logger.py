@@ -6,7 +6,6 @@ Create logger
 Connect to secure database
 Read and filter data
 """
-import csv
 import logging
 import os
 import re
