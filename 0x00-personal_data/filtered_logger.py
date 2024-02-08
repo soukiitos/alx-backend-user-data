@@ -23,7 +23,7 @@ def filter_datum(
     for field in fields:
         message = re.sub(
                 fr"{field}=.*?{separator}",
-                f"{field}={redaction}{separator} ", message
+                f"{field}={redaction}{separator}", message
                 )
     return message
 
@@ -45,6 +45,7 @@ class RedactingFormatter(logging.Formatter):
                 self.fields, self.REDACTION,
                 record.getMessage(), self.SEPARATOR
                 )
+        record.msg = record.msg.replace(';', '; ')
         return super(RedactingFormatter, self).format(record)
 
 
