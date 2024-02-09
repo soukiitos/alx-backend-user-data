@@ -22,7 +22,7 @@ def filter_datum(
     """Define filter_datum"""
     for field in fields:
         message = re.sub(
-                fr"{field}=.*?{separator}",
+                fr"({field}=)(.*?){separator}",
                 f"{field}={redaction}{separator}", message
                 )
     return message
