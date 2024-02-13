@@ -45,6 +45,7 @@ class BasicAuth(Auth):
             decoded_base64_authorization_header: str
             ) -> (str, str):
         """Return the user email and password from the Base64 decoded value
+        Basic - Allow password with ":"
         """
         if decoded_base64_authorization_header is None:
             return None, None
