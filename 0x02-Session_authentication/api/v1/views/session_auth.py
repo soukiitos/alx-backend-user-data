@@ -44,7 +44,7 @@ def logout():
     """Delete the Session ID contains in the request as cookie
     """
     from api.v1.app import auth
-    deleted_auth = auth.destroy_session(request)
-    if not deleted_auth:
+    deleted = auth.destroy_session(request)
+    if not deleted:
         abort(404)
     return jsonify({}), 200
