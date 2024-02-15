@@ -1,4 +1,4 @@
-#!!/usr/bin/env python3
+#!/usr/bin/env python3
 """Handle all routes for the Session authentication
 """
 from api.v1.views import app_views
