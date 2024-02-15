@@ -16,7 +16,7 @@ class SessionDBAuth(SessionExpAuth):
         """
         session_id = str(uuid.uuid4())
         if session_id is None:
-            return none
+            return None
         kwargs = {'user_id': user_id, 'session_id': session_id}
         user_session = UserSession(**kwargs)
         user_session.save()
