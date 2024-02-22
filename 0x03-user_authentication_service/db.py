@@ -4,28 +4,25 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
 from typing import TypeVar
-
-
 from user import Base, User
 
 
 class DB:
     """ DB Class
     """
-    def __init__(self) -> None:
+    def __init__(self):
         """Initialize a new DB instance
         """
-        self._engine = create_engine("sqlite:///a.db", echo=True)
+        self._engine = create_engine("sqlite:///a.db", echo=False)
         Base.metadata.drop_all(self._engine)
         Base.metadata.create_all(self._engine)
         self.__session = None
 
     @property
-    def _session(self) -> Session:
+    def _session(self):
         """Memoized session object
         """
         if self.__session is None:
@@ -45,8 +42,9 @@ class DB:
         """Find user"""
         if not kwargs:
             raise InvalidRequestError
+        col_name = User.__table__.columns.keys()
         for key in kwargs.keys():
-            if key not in User.__table__.columns.keys():
+            if key not in col_name:
                 raise InvalidRequestError
         user = self._session.query(User).filter_by(**kwargs).first()
         if user is None:
